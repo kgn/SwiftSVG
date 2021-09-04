@@ -263,6 +263,7 @@ internal struct HorizontalLineTo: PathCommand {
      Adds a horizontal line from the currentPoint to `CGPoint(self.coordinateBuffer[0], path.currentPoint.y)`
      */
     internal func execute(on path: UIBezierPath, previousCommand: PreviousCommand? = nil) {
+        guard self.coordinateBuffer.count > 0 else { return }
         let x = self.coordinateBuffer[0]
         let point = (self.pathType == .absolute ? CGPoint(x: CGFloat(x), y: path.currentPoint.y) : CGPoint(x: path.currentPoint.x + CGFloat(x), y: path.currentPoint.y))
         path.addLine(to: point)

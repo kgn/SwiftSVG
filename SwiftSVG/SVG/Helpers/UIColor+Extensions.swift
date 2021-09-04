@@ -83,13 +83,26 @@ public extension UIColor {
             return
         }
         
-        if svgString.hasPrefix("rgb") {
-            self.init(rgbString: svgString)
+        // longer prefix check needs to happen first
+        if svgString.hasPrefix("rgba") {
+            self.init(rgbaString: svgString)
             return
         }
         
-        if svgString.hasPrefix("rgba") {
-            self.init(rgbaString: svgString)
+        // TODO: fix the parsing issue that leads to this issue
+        if svgString.hasPrefix("rgb") && svgString.count > 3 {
+            self.init(rgbString: svgString)
+            return
+        }
+
+        // longer prefix check needs to happen first
+        if svgString.hasPrefix("hsla") {
+            self.init(hslaString: svgString)
+            return
+        }
+        
+        if svgString.hasPrefix("hsl") {
+            self.init(hslString: svgString)
             return
         }
         
@@ -166,6 +179,32 @@ public extension UIColor {
     internal convenience init(rgbaString: String) {
         let valuesString = rgbaString.dropFirst(5).dropLast()
         self.init(colorValuesString: valuesString)
+    }
+    
+    /**
+     Convenience initializer that creates a new UIColor from a integer functional, taking the form `hsla(hhh, s%, l%)`
+     */
+    internal convenience init(hslString: String) {
+        let valuesString = hslString.dropFirst(4).dropLast()
+        self.init(hslaValuesString: valuesString)
+    }
+    
+    /**
+     Convenience initializer that creates a new UIColor from an integer functional, taking the form `hsla(hhh, s%, l%, <alphavalue>)`
+     */
+    internal convenience init(hslaString: String) {
+        let valuesString = hslaString.dropFirst(5).dropLast()
+        self.init(hslaValuesString: valuesString)
+    }
+
+    /// :nodoc:
+    private convenience init(hslaValuesString: Substring) {
+        print(hslaValuesString)
+        let colorsArray = hslaValuesString
+            .split(separator: ",")
+            .map { CGFloat(String($0).replacingOccurrences(of: "%", with: "")
+                            .trimmingCharacters(in: CharacterSet.whitespaces)) ?? 0 }
+        self.init(hue: colorsArray[0] / 255.0, saturation: colorsArray[1] / 100, brightness: colorsArray[2] / 100, alpha: (colorsArray.count > 3 ? colorsArray[3] / 1.0 : 1.0))
     }
     
     /// :nodoc:
